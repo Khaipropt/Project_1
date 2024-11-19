@@ -47,72 +47,101 @@ function inputEdges(graph, type) {
                     inputEdge(count + 1);
                 });
             } else {
-                inputStartAndEnd(graph);
+                inputPoints(graph);
             }
         };
         inputEdge(0);
     });
 }
 
-function inputStartAndEnd(graph) {
-    rl.question('Nhập đỉnh bắt đầu (u): ', (start) => {
-        rl.question('Nhập đỉnh kết thúc (v): ', (end) => {
-            const result = bellmanFord(graph, start);
-            if (result[end] === Infinity) {
-                console.log(`Không có đường đi từ ${start} đến ${end}.`);
-            } else {
-                console.log(`Đường đi ngắn nhất từ ${start} đến ${end} có trọng số: ${result[end]}`);
-            }
-            rl.close();
-        });
+function inputPoints(graph) {
+    rl.question('Nhập các điểm cần đi qua (cách nhau bởi dấu cách): ', (points) => {
+        const pointList = points.split(' ').filter(p => p in graph);
+        const shortestPath = findShortestPath(graph, pointList);
+        console.log('Đường đi ngắn nhất qua các điểm:', shortestPath);
+        rl.close();
     });
 }
 
-function bellmanFord(graph, start) {
+function findShortestPath(graph, points) {
     const distances = {};
-    const predecessors = {};
-    const vertices = Object.keys(graph);
+    const visited = {};
+    const path = [];
 
-    // Khởi tạo khoảng cách
-    for (const vertex of vertices) {
-        distances[vertex] = Infinity;
-        predecessors[vertex] = null;
-    }
-    distances[start] = 0;
-
-    // Cập nhật khoảng cách
-    for (let i = 0; i < vertices.length - 1; i++) {
-        for (const u of vertices) {
-            for (const edge of graph[u]) {
-                const v = edge.node;
-                const weight = edge.weight;
-                if (distances[u] + weight < distances[v]) {
-                    distances[v] = distances[u] + weight;
-                    predecessors[v] = u; // Lưu lại đỉnh trước đó
-                }
+    // Tính toán khoảng cách giữa các điểm
+    for (const point of points) {
+        distances[point] = {};
+        for (const target of points) {
+            if (point !== target) {
+                distances[point][target] = dijkstra(graph, point, target);
             }
         }
     }
 
-    // In ra từng bước đi của đường đi ngắn nhất
-    for (const vertex of vertices) {
-        if (distances[vertex] < Infinity) {
-            console.log(`Khoảng cách từ ${start} đến ${vertex} là ${distances[vertex]}`);
-            printPath(predecessors, vertex);
+    // Tìm đường đi ngắn nhất qua tất cả các điểm (TSP)
+    const tsp = (current, visitedPoints, currentPath, currentLength) => {
+        if (visitedPoints.length === points.length) {
+            return { length: currentLength, path: [...currentPath, current] };
+        }
+
+        let best = { length: Infinity, path: [] };
+
+        for (const next of points) {
+            if (!visited[next]) {
+                visited[next] = true;
+                const result = tsp(next, [...visitedPoints, next], [...currentPath, current], currentLength + distances[current][next]);
+                visited[next] = false;
+
+                if (result.length < best.length) {
+                    best = result;
+                }
+            }
+        }
+
+        return best;
+    };
+
+    for (const start of points) {
+        visited[start] = true;
+        const result = tsp(start, [start], [], 0);
+        visited[start] = false;
+
+        if (result.length < best.length) {
+            best = result;
         }
     }
 
-    return distances;
+    return best.path;
 }
 
-function printPath(predecessors, vertex) {
-    const path = [];
-    let current = vertex;
-    while (current !== null) {
-        path.unshift(current);
-        current = predecessors[current];
+function dijkstra(graph, start, end) {
+    const distances = {};
+    const visited = {};
+    const queue = [];
+
+    for (const vertex in graph) {
+        distances[vertex] = Infinity;
+        visited[vertex] = false;
     }
-    console.log(`Đường đi: ${path.join(' -> ')}`);
+    distances[start] = 0;
+    queue.push({ node: start, distance: 0 });
+
+    while (queue.length > 0) {
+        queue.sort((a, b) => a.distance - b.distance);
+        const { node } = queue.shift();
+        if (visited[node]) continue;
+        visited[node] = true;
+
+        for (const neighbor of graph[node]) {
+            const newDistance = distances[node] + neighbor.weight;
+            if (newDistance < distances[neighbor.node]) {
+                distances[neighbor.node] = newDistance;
+                queue.push({ node: neighbor.node, distance: newDistance });
+            }
+        }
+    }
+
+    return distances[end] === Infinity ? null : distances[end];
 }
 
 // Gọi hàm nhập đồ thị
