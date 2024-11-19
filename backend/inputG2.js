@@ -54,7 +54,6 @@ function inputEdges(graph, type) {
                 console.log('Đồ thị đã nhập:');
                 console.log(graph);
 
-                // Tìm các thành phần liên thông và tính tổng trọng số
                 rl.close();
             }
         };
