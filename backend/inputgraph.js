@@ -6,33 +6,37 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-// Hàm tìm các thành phần liên thông
+// Hàm tìm các thành phần liên thông và tính tổng trọng số
 function findConnectedComponents(graph) {
-  const visited = new Set();
-  const components = [];
-
-  const dfs = (node, component) => {
-    visited.add(node);
-    component.push(node);
-    if (graph[node]) {
-      for (const neighbor of graph[node]) {
-        if (!visited.has(neighbor.node)) {
-          dfs(neighbor.node, component);
+    const visited = new Set();
+    const components = [];
+    const weights = [];
+  
+    const dfs = (node, component, weightSum) => {
+      visited.add(node);
+      component.push(node);
+      if (graph[node]) {
+        for (const neighbor of graph[node]) {
+          if (!visited.has(neighbor.node)) {
+            weightSum += neighbor.weight; // Cộng trọng số cạnh
+            dfs(neighbor.node, component, weightSum);
+          }
         }
       }
+      return weightSum;
+    };
+  
+    for (const node in graph) {
+      if (!visited.has(node)) {
+        const component = [];
+        const weightSum = dfs(node, component, 0); // Bắt đầu với trọng số 0
+        components.push(component);
+        weights.push(weightSum); // Lưu tổng trọng số của thành phần
+      }
     }
-  };
-
-  for (const node in graph) {
-    if (!visited.has(node)) {
-      const component = [];
-      dfs(node, component);
-      components.push(component);
-    }
+  
+    return { components, weights };
   }
-
-  return components;
-}
 
 
 // Hàm kiểm tra chu trình chứa hai đỉnh u và v và in ra chu trình
@@ -75,6 +79,28 @@ function findCycleContaining(graph, start, end) {
   
     // Bắt đầu DFS từ đỉnh start
     return dfs(start);
+  }
+
+// Hàm tìm chu trình giữa hai đỉnh u và v
+function findCycle(graph, start, end, visited, path, cycles, currentWeight) {
+    visited[start] = true;
+    path.push(start);
+  
+    for (const edge of graph[start]) {
+      const neighbor = edge.node;
+      const weight = edge.weight;
+  
+      // Nếu tìm thấy chu trình
+      if (neighbor === end && path.length > 1) {
+        cycles.push({ path: [...path, end], weight: currentWeight + weight }); // Lưu chu trình
+      } else if (!visited[neighbor]) {
+        findCycle(graph, neighbor, end, visited, path, cycles, currentWeight + weight);
+      }
+    }
+  
+    // Quay lại để tìm kiếm chu trình khác
+    visited[start] = false;
+    path.pop();
   }
 
 // Hàm kiểm tra chu trình Hamilton
@@ -269,12 +295,12 @@ function inputGraph() {
             console.log('Đồ thị đã nhập:');
             console.log(graph);
 
-        //   // Tìm các thành phần liên thông
-        //   const components = findConnectedComponents(graph);
-        //   console.log('Các vùng liên thông:');
-        //   components.forEach((component, index) => {
-        //     console.log(`Vùng liên thông ${index + 1}: ${component.join(', ')}`);
-        //   });
+          // Tìm các thành phần liên thông và tính tổng trọng số
+          const { components, weights } = findConnectedComponents(graph);
+          console.log('Các vùng liên thông và tổng trọng số của chúng:');
+          components.forEach((component, index) => {
+            console.log(`Vùng liên thông ${index + 1}: ${component.join(', ')} với tổng trọng số: ${weights[index]}`);
+          });
 
         //   //Nhập hai đỉnh kiểm tra chu trình u, v 
         //   rl.question('Nhập hai đỉnh u và v để kiểm tra chu trình (ví dụ: A B): ', (input) => {
@@ -312,20 +338,44 @@ function inputGraph() {
         //   }
         //   rl.close();
 
-        // Nhập điểm bắt đầu và kết thúc cho thuật toán Bellman-Ford
-        // Sau khi nhập xong các cạnh, hỏi người dùng về đỉnh bắt đầu và đỉnh kết thúc
-        // Sau khi nhập xong các cạnh, hỏi người dùng về đỉnh bắt đầu và đỉnh kết thúc
-        rl.question('Nhập đỉnh bắt đầu (u): ', (start) => {
-            rl.question('Nhập đỉnh kết thúc (v): ', (end) => {
-              const result = bellmanFord(graph, start, end);
-              if (result) {
-                console.log(`Khoảng cách ngắn nhất từ ${start} đến ${end} là: ${result.distance}`);
-                if(result.distance !== Infinity) {
-                    console.log(`Đường đi: ${result.path.join(' -> ')}`);}
-              }
-              rl.close();
-            });
-          });
+        // // Nhập điểm bắt đầu và kết thúc cho thuật toán Bellman-Ford
+        // // Sau khi nhập xong các cạnh, hỏi người dùng về đỉnh bắt đầu và đỉnh kết thúc
+        // // Sau khi nhập xong các cạnh, hỏi người dùng về đỉnh bắt đầu và đỉnh kết thúc
+        // rl.question('Nhập đỉnh bắt đầu (u): ', (start) => {
+        //     rl.question('Nhập đỉnh kết thúc (v): ', (end) => {
+        //       const result = bellmanFord(graph, start, end);
+        //       if (result) {
+        //         console.log(`Khoảng cách ngắn nhất từ ${start} đến ${end} là: ${result.distance}`);
+        //         if(result.distance !== Infinity) {
+        //             console.log(`Đường đi: ${result.path.join(' -> ')}`);}
+        //       }
+        //       rl.close();
+        //     });
+        //   });
+
+        // // Sau khi nhập xong các cạnh, hỏi người dùng về đỉnh bắt đầu và đỉnh kết thúc
+        // rl.question('Nhập đỉnh bắt đầu (u): ', (start) => {
+        //     rl.question('Nhập đỉnh kết thúc (v): ', (end) => {
+        //       const visited = {};
+        //       const path = [];
+        //       const cycles = [];
+  
+        //       // Tìm chu trình giữa u và v
+        //       findCycle(graph, start, end, visited, path, cycles, 0);
+  
+        //       if (cycles.length > 0) {
+        //         console.log(`Chu trình giữa ${start} và ${end}:`);
+        //         cycles.forEach((cycle, index) => {
+        //           console.log(`Chu trình ${index + 1}: ${cycle.path.join(' -> ')} với tổng trọng số: ${cycle.weight}`);
+        //         });
+        //       } else {
+        //         console.log(`Không tìm thấy chu trình giữa ${start} và ${end}.`);
+        //       }
+  
+        //       rl.close();
+        //     });
+        //   });
+            rl.close();
         }
         };
 
