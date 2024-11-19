@@ -6,38 +6,6 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
-// Hàm tìm các thành phần liên thông và tính tổng trọng số
-function findConnectedComponents(graph) {
-    const visited = new Set();
-    const components = [];
-    const weights = [];
-
-    const dfs = (node, component, weightSum) => {
-        visited.add(node);
-        component.push(node);
-        if (graph[node]) {
-            for (const neighbor of graph[node]) {
-                if (!visited.has(neighbor.node)) {
-                    weightSum += neighbor.weight; // Cộng trọng số cạnh
-                    dfs(neighbor.node, component, weightSum);
-                }
-            }
-        }
-        return weightSum;
-    };
-
-    for (const node in graph) {
-        if (!visited.has(node)) {
-            const component = [];
-            const weightSum = dfs(node, component, 0); // Bắt đầu với trọng số 0
-            components.push(component);
-            weights.push(weightSum); // Lưu tổng trọng số của thành phần
-        }
-    }
-
-    return { components, weights };
-}
-
 function inputGraph() {
     rl.question('Chọn loại đồ thị (1: Vô hướng, 2: Có hướng): ', (type) => {
         rl.question('Nhập số đỉnh của đồ thị: ', (vertexCount) => {
@@ -87,11 +55,6 @@ function inputEdges(graph, type) {
                 console.log(graph);
 
                 // Tìm các thành phần liên thông và tính tổng trọng số
-                const { components, weights } = findConnectedComponents(graph);
-                console.log('Các vùng liên thông và tổng trọng số của chúng:');
-                components.forEach((component, index) => {
-                    console.log(`Vùng liên thông ${index + 1}: ${component.join(', ')} với tổng trọng số: ${weights[index]}`);
-                });
                 rl.close();
             }
         };
