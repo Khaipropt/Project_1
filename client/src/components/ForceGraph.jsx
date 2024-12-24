@@ -26,7 +26,9 @@ const ForceGraph = () => {
   const [isDirected, setIsDirected] = useState(false);
   const [removeSourceNodeId, setRemoveSourceNodeId] = useState('');
   const [removeTargetNodeId, setRemoveTargetNodeId] = useState('');
-  const [removeNodeId, setRemoveNodeId] = useState(''); // New state for removing a node
+  const [removeNodeId, setRemoveNodeId] = useState('');
+  const [highlightedNodes, setHighlightedNodes] = useState([]);
+  const [highlightedLinks, setHighlightedLinks] = useState([]);
 
   const addNode = () => {
     if (newNodeId && newNodeLabel && !data.nodes.find(node => node.id === newNodeId)) {
@@ -81,13 +83,44 @@ const ForceGraph = () => {
     if (removeNodeId) {
       const updatedNodes = data.nodes.filter(node => node.id !== removeNodeId);
       const updatedLinks = data.links.filter(link => 
-        link.source.id !== removeNodeId && link.target.id !== removeNodeId
+        link.source !== removeNodeId && link.target !== removeNodeId
       );
       setData({ ...data, nodes: updatedNodes, links: updatedLinks });
       setRemoveNodeId('');
     } else {
       alert('Node ID is required to remove a node.');
     }
+  };
+
+  const findConnectedComponents = (startNodeId) => {
+    const visited = new Set();
+    const stack = [startNodeId];
+    const componentNodes = [];
+    const componentLinks = [];
+
+    while (stack.length) {
+      const nodeId = stack.pop();
+      if (!visited.has(nodeId)) {
+        visited.add(nodeId);
+        componentNodes.push(nodeId);
+        const connectedLinks = data.links.filter(link => link.source === nodeId || link.target === nodeId);
+        connectedLinks.forEach(link => {
+          componentLinks.push(link);
+          const nextNodeId = link.source === nodeId ? link.target : link.source;
+          if (!visited.has(nextNodeId)) {
+            stack.push(nextNodeId);
+          }
+        });
+      }
+    }
+
+    return { componentNodes, componentLinks };
+  };
+
+  const highlightComponent = (nodeId) => {
+    const { componentNodes, componentLinks } = findConnectedComponents(nodeId);
+    setHighlightedNodes(componentNodes);
+    setHighlightedLinks(componentLinks);
   };
 
   return (
@@ -172,9 +205,26 @@ const ForceGraph = () => {
           Directed Graph
         </label>
       </div>
+      <div style={{ marginBottom: '10px' }}>
+        <input
+          type="text"
+          placeholder="Enter node ID to highlight component"
+          onChange={(e) => highlightComponent(e.target.value)}
+        />
+        <button onClick={() => highlightComponent(sourceNodeId)}>Highlight Component</button>
+      </div>
       <div style={{ width: '800px', height: '600px' }}>
         <ForceGraph2D
-          graphData={data}
+          graphData={{
+            nodes: data.nodes.map(node => ({
+              ...node,
+              color: highlightedNodes.includes(node.id) ? 'red' : undefined,
+            })),
+            links: data.links.map(link => ({
+              ...link,
+              color: highlightedLinks.includes(link) ? 'red' : undefined,
+            })),
+          }}
           nodeAutoColorBy="id"
           linkDirectionalParticles={isWeighted ? 4 : 0}
           linkDirectionalParticleSpeed={d => d.value * 0.001}
@@ -188,4 +238,4 @@ const ForceGraph = () => {
   );
 };
 
-export default ForceGraph; 
+export default ForceGraph;
