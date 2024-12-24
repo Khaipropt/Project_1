@@ -21,9 +21,12 @@ const ForceGraph = () => {
   const [newNodeLabel, setNewNodeLabel] = useState('');
   const [sourceNodeId, setSourceNodeId] = useState('');
   const [targetNodeId, setTargetNodeId] = useState('');
-  const [linkValue, setLinkValue] = useState(1); // Trọng số mặc định cho liên kết
-  const [isWeighted, setIsWeighted] = useState(false); // Trạng thái cho loại đồ thị
-  const [isDirected, setIsDirected] = useState(false); // Trạng thái cho loại đồ thị
+  const [linkValue, setLinkValue] = useState(1);
+  const [isWeighted, setIsWeighted] = useState(false);
+  const [isDirected, setIsDirected] = useState(false);
+  const [removeSourceNodeId, setRemoveSourceNodeId] = useState('');
+  const [removeTargetNodeId, setRemoveTargetNodeId] = useState('');
+  const [removeNodeId, setRemoveNodeId] = useState(''); // New state for removing a node
 
   const addNode = () => {
     if (newNodeId && newNodeLabel && !data.nodes.find(node => node.id === newNodeId)) {
@@ -54,9 +57,36 @@ const ForceGraph = () => {
       setData({ ...data, links: updatedLinks });
       setSourceNodeId('');
       setTargetNodeId('');
-      setLinkValue(1); // Reset trọng số
+      setLinkValue(1);
     } else {
       alert('Both source and target node IDs are required and must exist in the graph.');
+    }
+  };
+
+  const removeLink = () => {
+    if (removeSourceNodeId && removeTargetNodeId) {
+      const updatedLinks = data.links.filter(link => 
+        !(link.source === removeSourceNodeId && link.target === removeTargetNodeId) &&
+        !(isDirected && link.source === removeTargetNodeId && link.target === removeSourceNodeId)
+      );
+      setData({ ...data, links: updatedLinks });
+      setRemoveSourceNodeId('');
+      setRemoveTargetNodeId('');
+    } else {
+      alert('Both source and target node IDs are required to remove a link.');
+    }
+  };
+
+  const removeNode = () => {
+    if (removeNodeId) {
+      const updatedNodes = data.nodes.filter(node => node.id !== removeNodeId);
+      const updatedLinks = data.links.filter(link => 
+        link.source.id !== removeNodeId && link.target.id !== removeNodeId
+      );
+      setData({ ...data, nodes: updatedNodes, links: updatedLinks });
+      setRemoveNodeId('');
+    } else {
+      alert('Node ID is required to remove a node.');
     }
   };
 
@@ -101,8 +131,32 @@ const ForceGraph = () => {
         <button onClick={addLink}>Add Link</button>
       </div>
       <div style={{ marginBottom: '10px' }}>
+        <input
+          type="text"
+          value={removeSourceNodeId}
+          onChange={(e) => setRemoveSourceNodeId(e.target.value)}
+          placeholder="Enter source node ID to remove link"
+        />
+        <input
+          type="text"
+          value={removeTargetNodeId}
+          onChange={(e) => setRemoveTargetNodeId(e.target.value)}
+          placeholder="Enter target node ID to remove link"
+        />
+        <button onClick={removeLink}>Remove Link</button>
+      </div>
+      <div style={{ marginBottom: '10px' }}>
+        <input
+          type="text"
+          value={removeNodeId}
+          onChange={(e) => setRemoveNodeId(e.target.value)}
+          placeholder="Enter node ID to remove"
+        />
+        <button onClick={removeNode}>Remove Node</button>
+      </div>
+      <div style={{ marginBottom: '10px' }}>
         <label>
-           <input
+          <input
             type="checkbox"
             checked={isWeighted}
             onChange={() => setIsWeighted(!isWeighted)}
@@ -122,16 +176,16 @@ const ForceGraph = () => {
         <ForceGraph2D
           graphData={data}
           nodeAutoColorBy="id"
-          linkDirectionalParticles={isWeighted ? 4 : 0} // Hiệu ứng hạt cho các liên kết có trọng số
-          linkDirectionalParticleSpeed={d => d.value * 0.001} // Tốc độ hạt
-          nodeLabel={node => node.label} // Hiển thị tên node
-          linkDirectionalArrowLength={isDirected ? 5 : 0} // Độ dài mũi tên cho đồ thị có hướng
-          linkDirectionalArrowColor="rgba(0, 0, 0, 0.5)" // Màu sắc mũi tên
-          linkLabel={link => isWeighted ? `Weight: ${link.value}` : ''} // Hiển thị trọng số trên các liên kết
+          linkDirectionalParticles={isWeighted ? 4 : 0}
+          linkDirectionalParticleSpeed={d => d.value * 0.001}
+          nodeLabel={node => node.label}
+          linkDirectionalArrowLength={isDirected ? 5 : 0}
+          linkDirectionalArrowColor="rgba(0, 0, 0, 0.5)"
+          linkLabel={link => isWeighted ? `Weight: ${link.value}` : ''}
         />
       </div>
     </div>
   );
 };
 
-export default ForceGraph;
+export default ForceGraph; 
