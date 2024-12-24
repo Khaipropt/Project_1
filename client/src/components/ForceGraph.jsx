@@ -121,6 +121,7 @@ const ForceGraph = () => {
     const { componentNodes, componentLinks } = findConnectedComponents(nodeId);
     setHighlightedNodes(componentNodes);
     setHighlightedLinks(componentLinks);
+    // alert(1);
   };
 
   return (

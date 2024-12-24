@@ -6,6 +6,52 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
+function convertGraphFormat(graph) {
+    const result = {};
+
+    // Duyệt qua các liên kết để xây dựng cấu trúc mới
+    graph.links.forEach(link => {
+        const source = link.source;
+        const target = link.target;
+        const weight = link.value;
+
+        // Nếu chưa có node trong kết quả, khởi tạo nó
+        if (!result[source]) {
+            result[source] = [];
+        }
+        if (!result[target]) {
+            result[target] = [];
+        }
+
+        // Thêm liên kết từ source đến target
+        result[source].push({ node: target, weight: weight });
+
+        // Thêm liên kết từ target đến source (nếu cần thiết)
+        result[target].push({ node: source, weight: weight });
+    });
+
+    return result;
+}
+
+// Dữ liệu đồ thị
+const graph1 = {
+    nodes: [
+        { id: 'A', label: 'Node A' },
+        { id: 'B', label: 'Node B' },
+        { id: 'C', label: 'Node C' },
+        { id: 'D', label: 'Node D' },
+    ],
+    links: [
+        { source: 'A', target: 'B', value: 1 },
+        { source: 'A', target: 'C', value: 2 },
+        { source: 'B', target: 'D', value: 3 },
+        { source: 'C', target: 'D', value: 4 },
+    ],
+};
+
+// Chuyển đổi dữ liệu
+const convertedGraph = convertGraphFormat(graph1);
+
 function inputGraph() {
     rl.question('Chọn loại đồ thị (1: Vô hướng, 2: Có hướng): ', (type) => {
         rl.question('Nhập số đỉnh của đồ thị: ', (vertexCount) => {
@@ -47,74 +93,66 @@ function inputEdges(graph, type) {
                     inputEdge(count + 1);
                 });
             } else {
-                inputPathFinding(graph);
+                // Kết thúc nhập
+                console.log('Đồ thị đã nhập:');
+                console.log(graph);
+                inputPoints(graph);
             }
         };
         inputEdge(0);
     });
 }
 
-function inputPathFinding(graph) {
-    rl.question('Nhập điểm bắt đầu: ', (start) => {
-        rl.question('Nhập điểm kết thúc: ', (end) => {
-            rl.question('Nhập các điểm cần đi qua (cách nhau bởi dấu phẩy): ', (points) => {
-                // nhớ thêm cách thì mới được
-                const pointsArray = points.split(' ').map(p => p.trim()).filter(p => p);
-                findShortestPath(graph, start, end, pointsArray);
-            });
-        });
+function inputPoints(graph) {
+    rl.question('Nhập tập các điểm (ví dụ: A B C): ', (points) => {
+        const pointArray = points.split(' ').filter(p => graph[p]); // Lọc các điểm hợp lệ
+        findCycles(graph, pointArray);
     });
 }
 
-function findShortestPath(graph, start, end, points) {
-    const allPoints = [start, ...points, end];
-    const permutations = getPermutations(points);
-    let minPath = null;
-    let minWeight = Infinity;
+function findCycles(graph, points) {
+    const cycles = [];
 
-    for (const perm of permutations) {
-        const path = [start, ...perm, end];
-        const weight = calculatePathWeight(graph, path);
-        if (weight < minWeight) {
-            minWeight = weight;
-            minPath = path;
+    const dfs = (node, visited, path, totalWeight) => {
+        if (visited[node]) {
+            const cycleStartIndex = path.indexOf(node);
+            if (cycleStartIndex !== -1) {
+                const cycle = path.slice(cycleStartIndex);
+                if (cycle.length > 2) { // Chu trình phải có ít nhất 3 đỉnh
+                    cycles.push({ cycle, totalWeight });
+                }
+            }
+            return;
         }
+
+        visited[node] = true;
+        path.push(node);
+
+        for (const neighbor of graph[node]) {
+            dfs(neighbor.node, visited, path, totalWeight + neighbor.weight);
+        }
+
+        path.pop();
+        visited[node] = false;
+    };
+
+    for (const point of points) {
+        const visited = {};
+        dfs(point, visited, [], 0);
     }
 
-    console.log('Đường đi ngắn nhất:', minPath.join(' -> '));
-    console.log('Trọng số:', minWeight);
+    // Loại bỏ các chu trình trùng lặp
+    const uniqueCycles = Array.from(new Set(cycles.map(cycleObj => cycleObj.cycle.join(',')))).map(cycle => cycle.split(','));
+
+    console.log('Các chu trình đi qua tập các điểm đã nhập:');
+    uniqueCycles.forEach(cycle => {
+        console.log(cycle)
+        // const cycleDetails = cycles.find(cycleObj => cycleObj.cycle.join(',') === cycle.join(','));
+        // console.log(`Chu trình: ${cycle.join(' -> ')}, Tổng trọng số: ${cycleDetails.totalWeight}`);
+    });
+    
     rl.close();
 }
 
-function calculatePathWeight(graph, path) {
-    let totalWeight = 0;
-    for (let i = 0; i < path.length - 1; i++) {
-        const u = path[i];
-        const v = path[i + 1];
-        const edge = graph[u].find(e => e.node === v);
-        if (edge) {
-            totalWeight += edge.weight;
-        } else {
-            return Infinity; // Không có đường đi
-        }
-    }
-    return totalWeight;
-}
-
-function getPermutations(array) {
-    if (array.length === 0) return [[]];
-    const first = array[0];
-    const rest = array.slice(1);
-    const permsWithoutFirst = getPermutations(rest);
-    const allPerms = [];
-    for (const perm of permsWithoutFirst) {
-        for (let i = 0; i <= perm.length; i++) {
-            const permWithFirst = [...perm.slice(0, i), first, ...perm.slice(i)];
-            allPerms.push(permWithFirst);
-        }
-    }
-    return allPerms;
-}
-
 // Gọi hàm nhập đồ thị
-inputGraph();
+inputPoints(convertedGraph);
