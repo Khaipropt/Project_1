@@ -7,6 +7,7 @@ const NavigationBar = () => {
   return (
     <Navbar className="nav-bar" >
       <Container>
+            <Link to='/' >
             <h2 style={{
                 color: 'white',
                 margin: 10,
@@ -14,13 +15,8 @@ const NavigationBar = () => {
             }}>
                HUST GRAPH
             </h2>
-          {/* <Nav>
-            <Stack direction="horizontal" gap={3} className="align-items-center">
-                <Button variant="primary">Button 1</Button>
-                <Button variant="secondary">Button 2</Button>
-                <Button variant="success">Button 3</Button>
-            </Stack>
-          </Nav> */}
+            </Link>
+            
       </Container>
       
     </Navbar>

@@ -1,20 +1,20 @@
+import {Routes, Route, Navigate} from "react-router-dom"
 import React from 'react';
 import ForceGraph from './components/ForceGraph';
 import NavigationBar from './components/NavBar';
-import { Button, Stack } from 'react-bootstrap';
-import BoxText from './components/BoxText';
-const App = () => {
+import { Button, Container, Stack } from 'react-bootstrap';
+import GraphDraw from "./page/GraphDraw";
+import Login from "./page/Login";
+function App() {
   return (
     <>
-      <NavigationBar/>
-      <h1>Đồ thị có hướng</h1>
-        <Stack direction="horizontal" gap={2}>
-          <ForceGraph/>
-            <BoxText/>
-            <BoxText/>
-        </Stack>
-      
-    </>
+    <NavigationBar/>
+    <Container>
+      <Routes>
+          <Route path = "/" element ={0 ?  <Login/> :  <GraphDraw/>}/> 
+      </Routes>
+    </Container>
+    </>  
   );
 };
 
