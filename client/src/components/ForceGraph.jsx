@@ -4,10 +4,10 @@ import { ForceGraph2D } from 'react-force-graph';
 const ForceGraph = () => {
   const [data, setData] = useState({
     nodes: [
-      { id: 'A', label: 'Node A' },
-      { id: 'B', label: 'Node B' },
-      { id: 'C', label: 'Node C' },
-      { id: 'D', label: 'Node D' },
+      { id: 'A', label: 'A' },
+      { id: 'B', label: 'B' },
+      { id: 'C', label: 'C' },
+      { id: 'D', label: 'D' },
     ],
     links: [
       { source: 'A', target: 'B', value: 1 },
@@ -31,8 +31,8 @@ const ForceGraph = () => {
   const [highlightedLinks, setHighlightedLinks] = useState([]);
 
   const addNode = () => {
-    if (newNodeId && newNodeLabel && !data.nodes.find(node => node.id === newNodeId)) {
-      const newNode = { id: newNodeId, label: newNodeLabel };
+    if (newNodeId && !data.nodes.find(node => node.id === newNodeId)) {
+      const newNode = { id: newNodeId, label: newNodeId };
       const updatedNodes = [...data.nodes, newNode];
       setData({ ...data, nodes: updatedNodes });
       setNewNodeId('');
@@ -132,12 +132,6 @@ const ForceGraph = () => {
           value={newNodeId}
           onChange={(e) => setNewNodeId(e.target.value)}
           placeholder="Enter new node ID"
-        />
-        <input
-          type="text"
-          value={newNodeLabel}
-          onChange={(e) => setNewNodeLabel(e.target.value)}
-          placeholder="Enter new node label"
         />
         <button onClick={addNode}>Add Node</button>
       </div>
