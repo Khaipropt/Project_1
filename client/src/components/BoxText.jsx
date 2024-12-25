@@ -6,7 +6,6 @@ const BoxText = () =>{
     const [status, setStatus] = useState(false)
     const changeStatus = async (e) => {
       await setStatus(e);
-      alert(status);
     };
     return(
         <div class = "box-text">
@@ -17,7 +16,9 @@ const BoxText = () =>{
             <h1 class="bt-h1-1" onClick={() => changeStatus(true)}>Nhập</h1>
             <h1 class="bt-h1-1" onClick={() => changeStatus(false)}>Chức năng</h1>
           </Container>
-          <Container>
+          <Container style={{
+            margin:40
+          }}>
             {
               status ? <Nhap/> : <ChucNang/>
             }
