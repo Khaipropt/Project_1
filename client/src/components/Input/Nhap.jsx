@@ -4,7 +4,8 @@ const Nhap = () => {
     return ( <div class="Nhap">
         <div style={
             {
-                height:200
+                height:180,
+                // backgroundColor:'red'
             }}>
             <h3>Loại đồ thị</h3>
             <div style={{
@@ -22,7 +23,7 @@ const Nhap = () => {
                 <p>Có</p>
                 <input type="radio" id="diem-ket-noi" name='huong' />
                 <p>Không</p>
-            </div>
+                </div>
             <div style={{ 
                     display: 'flex', 
                     justifyContent: 'space-between' 
@@ -40,8 +41,9 @@ const Nhap = () => {
 
         <div style={
             {
-                marginTop:40,
-                height:300
+                // backgroundColor:'red',
+                marginTop:10,
+                height:225
             }
         }>
             <div style={{ 

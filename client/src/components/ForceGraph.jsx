@@ -209,7 +209,7 @@ const ForceGraph = () => {
         <button onClick={() => highlightComponent(sourceNodeId)}>Highlight Component</button>
       </div>
       <div style={{ 
-        background: 'red',
+        // background: 'red',
         width: '800px', height: '600px' }}>
         <ForceGraph2D
           graphData={{

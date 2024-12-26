@@ -14,7 +14,7 @@
   margin: 20px;
   overflow-y: auto;
   width: 500px;
-  height: 90vh;
+  height: 80vh;
   border: 2px solid Black;
   border-radius: 10px;
 }
@@ -23,8 +23,8 @@
   background-color: red;
 }
 .bt-h1-1{
- 
   width: 200px;
+  height: 0px;
   margin: 40px;
 }
 .bt-h1-1:hover{
@@ -32,33 +32,53 @@
   text-decoration: underline;
 }
 
-.Nhap h3, .Nhap p {
-  font-size: 25px;
+.bt-h2-2{
+  height: 0px;
+  margin: 40px;
+}
+.bt-h2-2:hover{
+  color: #C517C2;
+  text-decoration: underline;
+}
+
+.Nhap h3, .Nhap p, .Chuc-nang h3, .Chuc-nang p {
+  font-size: 20px;
   line-height: 60px;
 }
 
 
-.Nhap #nhapChu  {
-  font-size: 25px;
+.Nhap #nhapChu, .Chuc-nang #nhapChu {
+  font-size: 20px;
   width: 220px;
   height: 42px;
   border: 2px solid Black;
   border-radius: 10px;
 }
-.Nhap #diem-ket-noi  {
+.Nhap #diem-ket-noi, .Chuc-nang #diem-ket-noi  {
   width: 20px;
   border: 2px solid Black;
   border-radius: 10px;
 }
 
-.Nhap Button {
-  margin-left: 200px;
+.Nhap Button , .Chuc-nang Button, .Ket-qua Button{
+  margin-left: 270px;
   font-size: 25px;
-  height: 55px;
-  width: 200px;
+  height: 40px;
+  width: 180px;
   border-radius: 15px;
 }
-.Nhap Button:hover {
+.Nhap Button:hover, .Chuc-nang Button:hover {
   background-color: #C517C2;
   color: white;
+  }
+  .Ket-qua {
+    margin: 10px;
+  }
+  .chon:hover {
+    margin-left: 10px;
+    background-color: #9B76EB;
+    border-radius: 10px;
+  }
+  .bi-bi-house:hover{
+    color: #C517C2;
   }
