@@ -11,16 +11,26 @@
   border-radius: 12px;
 }
 .box-text{
-  margin: 20px;
+  margin: 10px;
   overflow-y: auto;
   width: 500px;
   height: 80vh;
   border: 2px solid Black;
   border-radius: 10px;
 }
-
-.box-graph{
+.force-graph-2d{
+  margin: 10px;
+  width: 980px;
+  height: 80vh;
   background-color: red;
+}
+.box-graph{
+  overflow-y: auto;
+  margin: 10px;
+  width: 65%;
+  height: 80vh;
+  background-color: rgb(227, 207, 225);
+  border-radius: 10px;
 }
 .bt-h1-1{
   width: 200px;

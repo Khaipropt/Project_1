@@ -1,13 +1,14 @@
 import { Button } from "react-bootstrap";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { GraphContext } from "../../context/GraphContext";
 const ChucNang = () => {
     const [diemDiQua, setDiemDiQua] = useState([]);
     const [diemInput, setDiemInput] = useState('');
-
     const handleIncrement = () => {
         if (diemInput.trim() !== '' ) {
             setDiemDiQua([...diemDiQua, diemInput]);
             setDiemInput(''); // Reset input field
+            console.log(localStorage.getItem("Graph"));
         } else {
             alert("Vui lòng nhập điểm đi qua!");
         }
