@@ -1,6 +1,7 @@
 import { Button } from "react-bootstrap";
 
 const Nhap = () => {
+
     return ( <div class="Nhap">
         <div style={
             {
@@ -24,6 +25,7 @@ const Nhap = () => {
                 <input type="radio" id="diem-ket-noi" name='huong' />
                 <p>Không</p>
                 </div>
+                
             <div style={{ 
                     display: 'flex', 
                     justifyContent: 'space-between' 
@@ -51,7 +53,7 @@ const Nhap = () => {
             justifyContent: 'space-between' 
             }}>
                 <h3>Điểm đầu</h3>
-                <input type="text" id="nhapChu"  />
+                <input type="text" id="nhapChu" onChange={(e) => alert(e.target.value)} />
             </div>
                 <div style={{
                         marginLeft:10

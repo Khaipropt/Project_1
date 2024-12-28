@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { ForceGraph2D } from 'react-force-graph';
-import { addNode } from '../hook/DrawFunction';
+import { addNode } from '../hook/GraphFunction';
 const BoxGraph = () => {
     addNode(JSON.parse(localStorage.getItem("Graph")),"22");
     const [data, setData] = useState(addNode(JSON.parse(localStorage.getItem("Graph")),"22"));
+    addNode(JSON.parse(localStorage.getItem("Graph")),"21");
+    
     return ( <div class="box-graph">
         <ForceGraph2D
         graphData={data}
