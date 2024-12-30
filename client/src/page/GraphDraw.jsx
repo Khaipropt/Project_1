@@ -8,34 +8,92 @@ import BoxText from "../components/BoxText";
 
 const GraphDraw = () => {
         const [data, setData] = useState(JSON.parse(localStorage.getItem("Graph")));
-        const [statusBoxText, setStatusBoxText] = useState(false); // boxtext
+        const [statusBoxText, setStatusBoxText] = useState(true); // boxtext
         const [ketQua, setKetQua] = useState(1);
         const [kieuKetQua, setKieuKetQua] = useState([
       '',
       ,'liên thông',
       'chu trình',
       'đường đi ngắn nhất'
-    ]);
+    ]); 
+    const [luaChonChucNang, setLuaChonChucNang] = useState(2);
     const [statusKetQua, setStatusKetQua] = useState(true);
+    const [isWeighted, setIsWeighted] = useState(false);
+    const [isDirected, setIsDirected] = useState(false);
+    const [sourceNodeId, setSourceNodeId] = useState('');
+    const [targetNodeId, setTargetNodeId] = useState('');
+    const [linkValue, setLinkValue] = useState(1);
+    //Ham chuc nang them
+    const addNode = () => {
+        if (sourceNodeId && !data.nodes.find(node => node.id === sourceNodeId)) {
+          const newNode = { id: sourceNodeId, label: sourceNodeId };
+          const updatedNodes = [...data.nodes, newNode];
+          setData({ ...data, nodes: updatedNodes });
+          setSourceNodeId('');
+        } else {
+          alert('ID nút là bắt buộc và phải là duy nhất.');
+        }
+      };
 
-    //Ham chuc nang
+      const removeNode = () => {
+        if (sourceNodeId && data.nodes.find(node => node.id === sourceNodeId)) {
+          const updatedNodes = data.nodes.filter(node => node.id !== sourceNodeId);
+          const updatedLinks = data.links.filter(link => 
+            link.source.id !== sourceNodeId && link.target.id !== sourceNodeId
+          );
+          setData({ ...data, nodes: updatedNodes, links: updatedLinks });
+          setSourceNodeId('');
+        } else {
+          alert('Yêu cầu phải có ID nút để xóa một nút.');
+        }
+      };
 
-    const changeStatusBoxText = async (e) => {
-        await setStatusBoxText(e);
+      const addLink = () => {
+        if (sourceNodeId && targetNodeId && 
+            data.nodes.find(node => node.id === sourceNodeId) && 
+            data.nodes.find(node => node.id === targetNodeId) &&
+            !data.links.find(link => 
+              (isDirected && link.source.id === sourceNodeId && link.target.id === targetNodeId) || 
+              (!isDirected && ((link.source.id === sourceNodeId && link.target.id === targetNodeId) || (link.source === targetNodeId && link.target === sourceNodeId)))
+            )) {
+          const newLink = { 
+            source: sourceNodeId, 
+            target: targetNodeId, 
+            value: isWeighted ? linkValue : 1 
+          };
+          const updatedLinks = [...data.links, newLink];
+          setData({ ...data, links: updatedLinks });
+          setSourceNodeId('');
+          setTargetNodeId('');
+          setLinkValue(1);
+        } else {
+          alert('Cả ID nút nguồn và nút đích đều bắt buộc và phải tồn tại trong biểu đồ.');
+        }
+      };
+      const removeLink = () => {
+        if (sourceNodeId && targetNodeId && 
+            data.nodes.find(node => node.id === sourceNodeId) && 
+            data.nodes.find(node => node.id === targetNodeId) &&
+            data.links.find(link => 
+              (isDirected && link.source.id === sourceNodeId && link.target.id === targetNodeId) || 
+              (!isDirected && ((link.source.id === sourceNodeId && link.target.id === targetNodeId) || (link.source === targetNodeId && link.target === sourceNodeId)))
+            )) {
+          const updatedLinks = data.links.filter(link => 
+            !(link.source.id === sourceNodeId && link.target.id === targetNodeId) &&
+            !(isDirected && link.source === targetNodeId && link.target === sourceNodeId)
+          );
+          setData({ ...data, links: updatedLinks });
+          setSourceNodeId('');
+          setTargetNodeId('');
+        } else {
+          alert('Cả ID nút nguồn và nút đích và cạnh đều cần thiết để xóa liên kết.');
+        }
       };
 
     return ( <>
     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         
-        {/* BoxGraph */}
-        <div class="box-graph">
-        <ForceGraph2D
-        graphData={data}
-        nodeAutoColorBy="id"
-        linkDirectionalParticles={1} // Hiệu ứng hạt cho các liên kết
-        linkDirectionalParticleSpeed={d => d.value * 0.001} // Tốc độ hạt
-         />
-        </div> 
+         
 
         {/* Boxtext */}
         <div class = "box-text">
@@ -45,8 +103,8 @@ const GraphDraw = () => {
             display: 'flex', 
             justifyContent: 'space-between' 
             }}>
-            <h1 class="bt-h1-1" onClick={() => changeStatusBoxText(true)}>Nhập</h1>
-            <h1 class="bt-h1-1" onClick={() => changeStatusBoxText(false)}>Chức năng</h1>
+            <h1 class="bt-h1-1" onClick={() => setStatusBoxText(true)}>Nhập</h1>
+            <h1 class="bt-h1-1" onClick={() => setStatusBoxText(false)}>Chức năng</h1>
           </Container>
           <Container style={{
             marginLeft:20
@@ -73,9 +131,9 @@ const GraphDraw = () => {
                             <p style={{
                                 width:120
                             }}>Hướng :</p>
-                            <input type="radio" id="diem-ket-noi" name='huong' />
+                            <input type="radio" id="diem-ket-noi" name='huong' onClick={() => setIsDirected(true)}/>
                             <p>Có</p>
-                            <input type="radio" id="diem-ket-noi" name='huong' />
+                            <input type="radio" id="diem-ket-noi" name='huong' onClick={() => setIsDirected(false)}/>
                             <p>Không</p>
                             </div>
                             
@@ -86,10 +144,11 @@ const GraphDraw = () => {
                             <p style={{
                                 width:120
                             }}>Trọng số :</p>
-                            <input type="radio" id="diem-ket-noi" name='trong-so' />
+                            <input type="radio" id="diem-ket-noi" name='trong-so' onClick={() => setIsWeighted(true)}/>
                             <p>Có</p>
-                            <input type="radio" id="diem-ket-noi" name='trong-so' />
+                            <input type="radio" id="diem-ket-noi" name='trong-so' onClick={() => setIsWeighted(false)}/>
                             <p>Không</p>
+                            
                         </div>
                         </div>
                     </div>
@@ -105,8 +164,11 @@ const GraphDraw = () => {
                         display: 'flex', 
                         justifyContent: 'space-between' 
                         }}>
-                            <h3>Điểm đầu</h3>
-                            <input type="text" id="nhapChu" onChange={(e) => alert(e.target.value)} />
+                            <h3>Nhập điểm</h3>
+                            <input type="text" id="nhapChu" 
+                            value={sourceNodeId}
+                            onChange={(e) => setSourceNodeId(e.target.value)}
+                            />
                         </div>
                             <div style={{
                                     marginLeft:10
@@ -129,7 +191,10 @@ const GraphDraw = () => {
                                 justifyContent: 'space-between' 
                                 }}>
                                     <p>Điểm kết nối</p>
-                                    <input type="text" id="nhapChu"  />
+                                    <input type="text" id="nhapChu" 
+                                    value={targetNodeId}
+                                    onChange={(e) => setTargetNodeId(e.target.value)} 
+                                    />
                                 </div>
 
                                 <div style={{ 
@@ -137,16 +202,28 @@ const GraphDraw = () => {
                                 justifyContent: 'space-between' 
                                 }}>
                                     <p>Giá trị</p>
-                                    <input type="text" id="nhapChu"  />
+                                    <input type="text" id="nhapChu" 
+                                    value={linkValue}
+                                    onChange={(e) => setLinkValue(Number(e.target.value))}
+                                    />
                                 </div>
                             </div>    
                     </div>
-                    <Button>Kết Quả</Button>
+                    <div style={{
+                        marginLeft: -280,
+                        display: 'flex', 
+                        justifyContent: ''
+                        }}>
+
+                        <Button onClick={addLink}>Thêm </Button>
+                        <Button onClick={removeLink}>Xóa </Button>
+                    </div>
+                    
                 </div>
             
-               : 
+                : 
                 // Chucnang
-                
+
                 <div class="Chuc-nang">
                 <div style={
                     {
@@ -164,7 +241,7 @@ const GraphDraw = () => {
                             marginLeft: 50, 
                             }}>
                         
-                        <input type="radio" id="diem-ket-noi" name='thuc-hien-chuc-nang' />
+                        <input type="radio" id="diem-ket-noi" name='thuc-hien-chuc-nang' onClick={() =>setLuaChonChucNang(2)}/>
                         <p style={{
                             width:120,
                             marginLeft:50
@@ -175,7 +252,7 @@ const GraphDraw = () => {
                             display: 'flex', 
                             marginLeft: 50, 
                             }}>
-                        <input type="radio" id="diem-ket-noi" name='thuc-hien-chuc-nang' />
+                        <input type="radio" id="diem-ket-noi" name='thuc-hien-chuc-nang' onClick={() =>setLuaChonChucNang(3)}/>
                         <p style={{
                             width:120,
                             marginLeft:50
@@ -186,7 +263,7 @@ const GraphDraw = () => {
                             display: 'flex', 
                             marginLeft: 50, 
                             }}>
-                        <input type="radio" id="diem-ket-noi" name='thuc-hien-chuc-nang' />
+                        <input type="radio" id="diem-ket-noi" name='thuc-hien-chuc-nang' onClick={() =>setLuaChonChucNang(4)}/>
                         <p style={{
                             width:200,
                             marginLeft:50
@@ -202,6 +279,7 @@ const GraphDraw = () => {
                         height:225
                     }
                 }>
+                    
                     <div style={{ 
                     display: 'flex', 
                     justifyContent: 'space-between' 
@@ -218,7 +296,7 @@ const GraphDraw = () => {
                     </div>
                     <Button style={{
                         marginTop:10
-                    }}>Kết Quả</Button>
+                    }} onClick={() => setKetQua(luaChonChucNang)}>Kết Quả</Button>
                 </div>
                 
             </div>                    
@@ -274,6 +352,21 @@ const GraphDraw = () => {
           </Container>
           </>}
         </div>
+
+        {/* BoxGraph */}
+        <div class="box-graph">
+        <ForceGraph2D
+        graphData={data}
+        nodeAutoColorBy="id"
+        linkDirectionalParticles={isWeighted ? 4 : 1}
+        linkDirectionalParticleSpeed={d => d.value * 0.001}
+        nodeLabel={node => node.label}
+        linkDirectionalArrowLength={isDirected ? 5 : 0}
+        linkDirectionalArrowColor="rgba(0, 0, 0, 0.5)"
+        linkLabel={link => isWeighted ? `Weight: ${link.value}` : ''}
+        />
+        </div>
+
     </div>
     </>
      );

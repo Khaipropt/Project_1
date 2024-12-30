@@ -58,6 +58,7 @@
 
 
 .Nhap #nhapChu, .Chuc-nang #nhapChu {
+  margin: 2px;
   font-size: 20px;
   width: 220px;
   height: 42px;
