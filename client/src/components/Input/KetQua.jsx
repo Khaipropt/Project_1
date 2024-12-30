@@ -10,9 +10,9 @@ const KetQua = ({result}) => {
         'Chu trình',
         'Đường đi ngắn nhất'
       ]);
-    const [status, setStatus] = useState(true);
+    const [statusKetQua, setStatusKetQua] = useState(true);
     return ( <div class='Ket-qua'>
-        {!status && <>
+        {!statusKetQua && <>
             <h3>Có n {kieuKetQua[result]}: </h3>
         <div style={{
             margin:20
@@ -22,7 +22,7 @@ const KetQua = ({result}) => {
         </>
         }
         {
-            status && <>
+            statusKetQua && <>
             <h3>{kieuKetQua[result]} thứ n : </h3>
         <div style={{
             margin:20
@@ -32,7 +32,7 @@ const KetQua = ({result}) => {
         </div>
             </>
         }
-        <Button onClick={() => setStatus(!status)}>Quay lại</Button>
+        <Button onClick={() => setStatusKetQua(!statusKetQua)}>Quay lại</Button>
     </div> );
 }
  

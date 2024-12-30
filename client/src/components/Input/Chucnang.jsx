@@ -2,17 +2,7 @@ import { Button } from "react-bootstrap";
 import { useContext, useState } from "react";
 import { GraphContext } from "../../context/GraphContext";
 const ChucNang = () => {
-    const [diemDiQua, setDiemDiQua] = useState([]);
-    const [diemInput, setDiemInput] = useState('');
-    const handleIncrement = () => {
-        if (diemInput.trim() !== '' ) {
-            setDiemDiQua([...diemDiQua, diemInput]);
-            setDiemInput(''); // Reset input field
-            console.log(localStorage.getItem("Graph"));
-        } else {
-            alert("Vui lòng nhập điểm đi qua!");
-        }
-    };
+    
     return ( <div class="Chuc-nang">
         <div style={
             {
@@ -82,25 +72,6 @@ const ChucNang = () => {
                 <h3>Điểm cuối</h3>
                 <input type="text" id="nhapChu"  />
             </div>
-            <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between' 
-            }}>
-                <h3>Điểm đi qua</h3>
-                <input type="text" id="nhapChu"
-                value={diemInput} 
-                onChange={(e) => setDiemInput(e.target.value)}
-                />
-            </div>
-            <div>
-                {diemDiQua.map((diem, index) => (
-                    <div key={index} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <h3>Điểm đi qua</h3>
-                        <input type="text"  id="nhapChu" value={diem} readOnly />
-                    </div>
-                ))}
-            </div>
-            <Button onClick={handleIncrement}>Thêm điểm</Button>
             <Button style={{
                 marginTop:10
             }}>Kết Quả</Button>
