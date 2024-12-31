@@ -1,37 +1,75 @@
+const graph = {
+    nodes: [
+        { id: 'A', label: 'A' },
+        { id: 'B', label: 'B' },
+        { id: 'C', label: 'C' },
+        { id: 'D', label: 'D' },
+        { id: 'E', label: 'E' },
+    ],
+    links: [
+        { source: 'B', target: 'A', value: 1 },
+        { source: 'A', target: 'E', value: 1 },
+        { source: 'E', target: 'C', value: 1 },
+        { source: 'A', target: 'C', value: 1 },
+        { source: 'D', target: 'B', value: 2 },
+        { source: 'C', target: 'D', value: 3 },
+    ],
+};
 
-// Hàm tìm các thành phần liên thông
-export const findConnectedComponents = (data) => {
-    const createAdjacencyList = (data) => {
-        const adjacencyList = {};
-        data.nodes.forEach(node => {
-            adjacencyList[node.id] = [];
-        });
-        data.links.forEach(link => {
-            adjacencyList[link.source].push(link.target);
-            adjacencyList[link.target].push(link.source); // Nếu đồ thị vô hướng
-        });
-        return adjacencyList;
-    };
-    const dfs = (node, visited, adjacencyList, component) => {
-        visited.add(node);
-        component.push(node);
-        adjacencyList[node].forEach(neighbor => {
-            if (!visited.has(neighbor)) {
-                dfs(neighbor, visited, adjacencyList, component);
-            }
-        });
-    };
-    const adjacencyList = createAdjacencyList(data);
+function findCycle(graph) {
+    const adjList = new Map();
     const visited = new Set();
-    const components = [];
+    const recStack = new Set();
+    const path = [];
 
-    for (const node of data.nodes.map(n => n.id)) {
-        if (!visited.has(node)) {
-            const component = [];
-            dfs(node, visited, adjacencyList, component);
-            components.push(component);
+    // Tạo danh sách kề từ dữ liệu đồ thị
+    graph.links.forEach(link => {
+        if (!adjList.has(link.source)) {
+            adjList.set(link.source, []);
+        }
+        adjList.get(link.source).push(link.target);
+    });
+
+    function dfs(node) {
+        if (recStack.has(node)) {
+            // Nếu node đã có trong stack, có chu trình
+            return true;
+        }
+        if (visited.has(node)) {
+            return false;
+        }
+
+        visited.add(node);
+        recStack.add(node);
+        path.push(node);
+
+        const neighbors = adjList.get(node) || [];
+        for (const neighbor of neighbors) {
+            if (dfs(neighbor)) {
+                return true;
+            }
+        }
+
+        recStack.delete(node);
+        path.pop();
+        return false;
+    }
+
+    for (const node of graph.nodes) {
+        if (!visited.has(node.id)) {
+            if (dfs(node.id)) {
+                // Nếu tìm thấy chu trình, in ra chu trình
+                return path.concat(node.id); // Trả về chu trình
+            }
         }
     }
 
-    return components;
-};
+    return null; // Không tìm thấy chu trình
+}
+
+const cycle = findCycle(graph);
+if (cycle) {
+    console.log("Chu trình tìm thấy:", cycle);
+} else {
+    console.log("Không có chu trình nào.");
+}

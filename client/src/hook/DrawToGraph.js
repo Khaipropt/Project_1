@@ -1,4 +1,4 @@
-function convertGraphFormat(graph) {
+export const convertGraphFormat = (graph) => {
     const result = {};
 
     // Duyệt qua các liên kết để xây dựng cấu trúc mới

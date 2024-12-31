@@ -117,6 +117,59 @@ const ForceGraph = () => {
     return { componentNodes, componentLinks };
   };
 
+  const findShortestPath = (startNodeId, endNodeId) => {
+    const queue = [startNodeId];
+    const visited = new Set();
+    const previous = {};
+    visited.add(startNodeId);
+
+    while (queue.length > 0) {
+      const currentNodeId = queue.shift();
+      if (currentNodeId === endNodeId) {
+        break;
+      }
+
+      const neighbors = data.links
+        .filter(link => link.source === currentNodeId || link.target === currentNodeId)
+        .map(link => (link.source === currentNodeId ? link.target : link.source));
+
+      for (const neighbor of neighbors) {
+        if (!visited.has(neighbor)) {
+          visited.add(neighbor);
+          queue.push(neighbor);
+          previous[neighbor] = currentNodeId;
+        }
+      }
+    }
+
+    // Reconstruct the path
+    const path = [];
+    let currentNodeId = endNodeId;
+    while (currentNodeId) {
+      path.unshift(currentNodeId);
+      currentNodeId = previous[currentNodeId];
+    }
+
+    // Check if the path is valid
+    if (path[0] === startNodeId) {
+      setShortestPath(path);
+      return path;
+    } else {
+      alert('No path found between the selected nodes.');
+      return [];
+    }
+  };
+  const highlightShortestPath = () => {
+    if (sourceNodeId && targetNodeId) {
+      const path = findShortestPath(sourceNodeId, targetNodeId);
+      setHighlightedNodes(path);
+      setHighlightedLinks(data.links.filter(link => 
+        path.includes(link.source) && path.includes(link.target)
+      ));
+    } else {
+      alert('Both source and target node IDs are required to find the shortest path.');
+    }
+  };
   const highlightComponent = (nodeId) => {
     const { componentNodes, componentLinks } = findConnectedComponents(nodeId);
     setHighlightedNodes(componentNodes);
@@ -206,7 +259,22 @@ const ForceGraph = () => {
           placeholder="Enter node ID to highlight component"
           onChange={(e) => highlightComponent(e.target.value)}
         />
-        <button onClick={() => highlightComponent(sourceNodeId)}>Highlight Component</button>
+        {/* <button onClick={() => highlightComponent(sourceNodeId)}>Highlight Component</button> */}
+        <div style={{ marginBottom: '10px' }}>
+        <input
+          type="text"
+          value={sourceNodeId}
+          onChange={(e) => setSourceNodeId(e.target.value)}
+          placeholder="Enter source node ID for shortest path"
+        />
+        <input
+          type=" text"
+          value={targetNodeId}
+          onChange={(e) => setTargetNodeId(e.target.value)}
+          placeholder="Enter target node ID for shortest path"
+        />
+        <button onClick={highlightShortestPath}>Find Shortest Path</button>
+        </div>
       </div>
       <div style={{ 
         // background: 'red',

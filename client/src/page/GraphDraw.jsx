@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ForceGraph2D } from 'react-force-graph';
 import {Container, Button} from "react-bootstrap"
-import Nhap from "../components/Input/Nhap";
-import ChucNang from "../components/Input/Chucnang";
-import KetQua from '../components/Input/KetQua';
-import BoxText from "../components/BoxText";
 
 const GraphDraw = () => {
         const [data, setData] = useState(JSON.parse(localStorage.getItem("Graph")));
@@ -17,7 +13,7 @@ const GraphDraw = () => {
       'đường đi ngắn nhất'
     ]); 
     const [luaChonChucNang, setLuaChonChucNang] = useState(2);
-    const [statusKetQua, setStatusKetQua] = useState(true);
+    const [statusKetQua, setStatusKetQua] = useState(false);
     const [isWeighted, setIsWeighted] = useState(false);
     const [isDirected, setIsDirected] = useState(false);
     const [sourceNodeId, setSourceNodeId] = useState('');
@@ -28,6 +24,114 @@ const GraphDraw = () => {
     const [isConnectLink, setIsConnectLink] = useState(false);
     const [sourceResultNodeId, setSourceResultNodeId] = useState('');
     const [targetResultNodeId, setTargetResultNodeId] = useState('');
+    //test 
+    // console.log(data);
+    
+    // Liên thông
+    const ConnectedComponents = (data) =>{
+      const createAdjacencyList = (data) => {
+          const adjacencyList = {};
+          data.nodes.forEach(node => {
+              adjacencyList[node.id] = [];
+          });
+          data.links.forEach(link => {
+              adjacencyList[link.source].push(link.target);
+              if (!isDirected) adjacencyList[link.target].push(link.source); // Nếu đồ thị vô hướng
+          });
+          return adjacencyList;
+      };
+      const dfs = (node, visited, adjacencyList, component) => {
+          visited.add(node);
+          component.push(node);
+          adjacencyList[node].forEach(neighbor => {
+              if (!visited.has(neighbor)) {
+                  dfs(neighbor, visited, adjacencyList, component);
+              }
+          });
+      };
+      const adjacencyList = createAdjacencyList(data);
+      const visited = new Set();
+      const components = [];
+  
+      for (const node of data.nodes.map(n => n.id)) {
+          if (!visited.has(node)) {
+              const component = [];
+              dfs(node, visited, adjacencyList, component);
+              components.push(component);
+          }
+      }
+  
+      return components;
+  };
+    console.log(ConnectedComponents(data).at(0).join(","));
+    // Chu trình
+
+    // Đường đi ngắn nhất
+
+    const findShortestPath = (graph, start, end) => {
+
+        
+      const adjList = {};
+      graph.nodes.forEach(node => {
+          adjList[node.id] = [];
+      });
+      
+      graph.links.forEach(link => {
+          adjList[link.source].push({ target: link.target, weight: link.value });
+          if (!isDirected) adjList[link.target].push({ target: link.source, weight: link.value });
+      });
+  
+      const distances = {};
+      const visited = new Set();
+      const parent = {};
+      const priorityQueue = [];
+  
+      graph.nodes.forEach(node => {
+          distances[node.id] = Infinity;
+          parent[node.id] = null;
+      });
+      distances[start] = 0;
+      priorityQueue.push({ node: start, distance: 0 });
+      // Dijkstra's algorithm
+      while (priorityQueue.length > 0) {
+          priorityQueue.sort((a, b) => a.distance - b.distance);
+          const { node: current } = priorityQueue.shift();
+  
+          if (current === end) {
+              break;
+          }
+  
+          if (visited.has(current)) {
+              continue;
+          }
+          visited.add(current);
+  
+          for (const neighbor of adjList[current]) {
+              const newDistance = distances[current] + neighbor.weight;
+  
+              if (newDistance < distances[neighbor.target]) {
+                  distances[neighbor.target] = newDistance;
+                  parent[neighbor.target] = current;
+                  priorityQueue.push({ node: neighbor.target, distance: newDistance });
+              }
+          }
+      }
+  
+      const path = [];
+      let current = end;
+  
+      while (current !== null) {
+          path.push(current);
+          current = parent[current];
+      }
+  
+      path.reverse();
+      
+      const totalDistance = distances[end];
+      if (totalDistance === Infinity) return {path:"0",totalDistance};
+      return { path, totalDistance };
+  }
+
     
     //Ham chuc nang them
     const addNode = () => {
@@ -89,11 +193,37 @@ const GraphDraw = () => {
           alert('Cả ID nút nguồn và nút đích và cạnh đều cần thiết để xóa liên kết.');
         }
       };
+
+      const findConnectedComponents = (startNodeId) => {
+        const visited = new Set();
+        const stack = [startNodeId];
+        const componentNodes = [];
+        const componentLinks = [];
+    
+        while (stack.length) {
+          const nodeId = stack.pop();
+          if (!visited.has(nodeId)) {
+            visited.add(nodeId);
+            componentNodes.push(nodeId);
+            const connectedLinks = data.links.filter(link => link.source === nodeId || link.target === nodeId);
+            connectedLinks.forEach(link => {
+              componentLinks.push(link);
+              const nextNodeId = link.source === nodeId ? link.target : link.source;
+              if (!visited.has(nextNodeId)) {
+                stack.push(nextNodeId);
+              }
+            });
+          }
+        }
+    
+        return { componentNodes, componentLinks };
+      };
+
       const highlightComponent = (nodeId) => {
         const { componentNodes, componentLinks } = findConnectedComponents(nodeId);
         setHighlightedNodes(componentNodes);
         setHighlightedLinks(componentLinks);
-        alert(1);
+        // alert(1);
       };
     return ( <>
     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -351,7 +481,7 @@ const GraphDraw = () => {
             style={{
               marginTop: 40
             }
-          } onClick={() => setKetQua(1)}
+          } onClick={() => {setKetQua(1); highlightComponent("")}}
             >
               <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5z"/>
             </svg>
@@ -361,17 +491,33 @@ const GraphDraw = () => {
             marginLeft:20
           }}>
                 {/* KetQua */}
-                <div class='Ket-qua'>
-                {!statusKetQua && <>
-                    <h3>Có n {
+                <div class='Ket-qua' style={{marginTop:20}}>
+                {luaChonChucNang==2 && <>
+                    <h3>Có {ConnectedComponents(data).length} {
                       kieuKetQua[ketQua]
                       }: </h3>
                 <div style={{
                     margin:20
                 }}>
-                    {<p class='chon'>{kieuKetQua[ketQua]} thứ 1: giá trị </p>}
+                    {
+                      ConnectedComponents(data).map((component, index) =>
+                        <p class='chon' onClick={() => highlightComponent(component.at(0))}>{kieuKetQua[ketQua]} thứ {index + 1}: {component.join(",")} </p>
+                      )
+                    }
+
+                    {/* Cần chỉnh sửa */}
                 </div>
                 </>
+                }
+                {
+                  luaChonChucNang==4 && <>
+                  <h3 style={{
+                    marginTop:30
+                }}> Đường đi ngắn nhất từ {sourceResultNodeId} đến {targetResultNodeId} là: </h3>
+                  
+                    <p>{findShortestPath(data, sourceResultNodeId, targetResultNodeId).path.join(", ")}</p>
+                    <p>Có giá trị là: {findShortestPath(data, sourceResultNodeId, targetResultNodeId).totalDistance}</p>
+                  </>
                 }
                 {
                     statusKetQua && <>
@@ -384,7 +530,7 @@ const GraphDraw = () => {
                 </div>
                     </>
                 }
-                <Button onClick={() => setStatusKetQua(!statusKetQua)}>Quay lại</Button>
+                {/* <Button onClick={() => setStatusKetQua(!statusKetQua)}>Quay lại</Button> */}
             </div>
            
           </Container>
@@ -397,11 +543,11 @@ const GraphDraw = () => {
         graphData={{
           nodes: data.nodes.map(node => ({
             ...node,
-            color: highlightedNodes.includes(node.id) ? 'red' : undefined,
+            color: highlightedNodes.includes(node.id) ? 'yellow' : undefined,
           })),
           links: data.links.map(link => ({
             ...link,
-            color: highlightedLinks.includes(link) ? 'red' : undefined,
+            color: highlightedLinks.includes(link) ? 'yellow' : undefined,
           })),
         }}
         nodeAutoColorBy="id"
