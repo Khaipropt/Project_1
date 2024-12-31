@@ -141,7 +141,7 @@ const GraphDraw = () => {
                             }}>Hướng :</p>
                             <input type="radio" id="diem-ket-noi" name='huong' onClick={() => setIsDirected(true)}/>
                             <p>Có</p>
-                            <input type="radio" id="diem-ket-noi" name='huong' onClick={() => setIsDirected(false)}/>
+                            <input type="radio" id="diem-ket-noi" name='huong' onClick={() => setIsDirected(false)} checked={!isDirected}/>
                             <p>Không</p>
                             </div>
                             
@@ -152,9 +152,9 @@ const GraphDraw = () => {
                             <p style={{
                                 width:120
                             }}>Trọng số :</p>
-                            <input type="radio" id="diem-ket-noi" name='trong-so' onClick={() => setIsWeighted(true)}/>
+                            <input type="radio" id="diem-ket-noi" name='trong-so' onClick={() => setIsWeighted(true)} />
                             <p>Có</p>
-                            <input type="radio" id="diem-ket-noi" name='trong-so' onClick={() => setIsWeighted(false)}/>
+                            <input type="radio" id="diem-ket-noi" name='trong-so' onClick={() => setIsWeighted(false)} checked={!isWeighted}/>
                             <p>Không</p>
                             
                         </div>
@@ -193,7 +193,7 @@ const GraphDraw = () => {
                                     onClick={() => setIsConnectLink(true)}/>
                                     <p>Có</p>
                                     <input type="radio" id="diem-ket-noi" name='ket-noi' 
-                                    onClick={() => setIsConnectLink(false)}
+                                    onClick={() => setIsConnectLink(false)} checked={!isConnectLink}
                                     />
                                     <p>Không</p>
                                 </div>
@@ -307,7 +307,8 @@ const GraphDraw = () => {
                         height:225
                     }
                 }>
-                    
+                  {
+                    !(luaChonChucNang == 2) && <div>
                     <div style={{ 
                     display: 'flex', 
                     justifyContent: 'space-between' 
@@ -322,6 +323,10 @@ const GraphDraw = () => {
                         <h3>Điểm cuối</h3>
                         <input type="text" id="nhapChu"  />
                     </div>
+                  </div>
+                  }
+                    
+    
                     <Button style={{
                         marginTop:10
                     }} onClick={() => setKetQua(luaChonChucNang)}>Kết Quả</Button>
@@ -384,16 +389,7 @@ const GraphDraw = () => {
         {/* BoxGraph */}
         <div class="box-graph">
         <ForceGraph2D
-        graphData={{
-          nodes: data.nodes.map(node => ({
-            ...node,
-            color: highlightedNodes.includes(node.id) ? 'red' : undefined,
-          })),
-          links: data.links.map(link => ({
-            ...link,
-            color: highlightedLinks.includes(link) ? 'red' : undefined,
-          })),
-        }}
+        graphData={data}
         nodeAutoColorBy="id"
         linkDirectionalParticles={isWeighted ? 4 : 1}
         linkDirectionalParticleSpeed={d => d.value * 0.001}
