@@ -28,7 +28,8 @@ function App() {
     <NavigationBar/>
     <Container>
       <Routes>
-          <Route path = "/" element ={0 ?  <Login/> :  <GraphDraw/>}/> 
+          <Route path="/test" element={<Login/>}/>
+          <Route path = "/" element ={<GraphDraw/>}/> 
       </Routes>
     </Container>
     </>  

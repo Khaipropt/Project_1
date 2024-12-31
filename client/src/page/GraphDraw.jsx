@@ -28,6 +28,7 @@ const GraphDraw = () => {
     const [isConnectLink, setIsConnectLink] = useState(false);
     const [sourceResultNodeId, setSourceResultNodeId] = useState('');
     const [targetResultNodeId, setTargetResultNodeId] = useState('');
+    
     //Ham chuc nang them
     const addNode = () => {
         if (sourceNodeId && !data.nodes.find(node => node.id === sourceNodeId)) {
@@ -44,7 +45,7 @@ const GraphDraw = () => {
         if (sourceNodeId && data.nodes.find(node => node.id === sourceNodeId)) {
           const updatedNodes = data.nodes.filter(node => node.id !== sourceNodeId);
           const updatedLinks = data.links.filter(link => 
-            link.source.id !== sourceNodeId && link.target.id !== sourceNodeId
+            link.source !== sourceNodeId && link.target !== sourceNodeId
           );
           setData({ ...data, nodes: updatedNodes, links: updatedLinks });
           setSourceNodeId('');
@@ -76,15 +77,9 @@ const GraphDraw = () => {
         }
       };
       const removeLink = () => {
-        if (sourceNodeId && targetNodeId && 
-            data.nodes.find(node => node.id === sourceNodeId) && 
-            data.nodes.find(node => node.id === targetNodeId) &&
-            data.links.find(link => 
-              (isDirected && link.source.id === sourceNodeId && link.target.id === targetNodeId) || 
-              (!isDirected && ((link.source.id === sourceNodeId && link.target.id === targetNodeId) || (link.source === targetNodeId && link.target === sourceNodeId)))
-            )) {
+        if (sourceNodeId && targetNodeId ) {
           const updatedLinks = data.links.filter(link => 
-            !(link.source.id === sourceNodeId && link.target.id === targetNodeId) &&
+            !(link.source === sourceNodeId && link.target === targetNodeId) &&
             !(isDirected && link.source === targetNodeId && link.target === sourceNodeId)
           );
           setData({ ...data, links: updatedLinks });
@@ -98,7 +93,7 @@ const GraphDraw = () => {
         const { componentNodes, componentLinks } = findConnectedComponents(nodeId);
         setHighlightedNodes(componentNodes);
         setHighlightedLinks(componentLinks);
-        // alert(1);
+        alert(1);
       };
     return ( <>
     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -399,7 +394,16 @@ const GraphDraw = () => {
         {/* BoxGraph */}
         <div class="box-graph">
         <ForceGraph2D
-        graphData={data}
+        graphData={{
+          nodes: data.nodes.map(node => ({
+            ...node,
+            color: highlightedNodes.includes(node.id) ? 'red' : undefined,
+          })),
+          links: data.links.map(link => ({
+            ...link,
+            color: highlightedLinks.includes(link) ? 'red' : undefined,
+          })),
+        }}
         nodeAutoColorBy="id"
         linkDirectionalParticles={isWeighted ? 4 : 1}
         linkDirectionalParticleSpeed={d => d.value * 0.001}

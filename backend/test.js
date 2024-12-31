@@ -1,44 +1,37 @@
-function convertDataStructure(inputData) {
-    // Step 1: Create a unique list of nodes
-    const nodes = [];
-    const nodeSet = new Set();
 
-    for (const key in inputData) {
-        if (!nodeSet.has(key)) {
-            nodeSet.add(key);
-            nodes.push({ id: key, label: `${key}` });
-        }
-
-        inputData[key].forEach(link => {
-            if (!nodeSet.has(link.node)) {
-                nodeSet.add(link.node);
-                nodes.push({ id: link.node, label: `${link.node}` });
+// Hàm tìm các thành phần liên thông
+export const findConnectedComponents = (data) => {
+    const createAdjacencyList = (data) => {
+        const adjacencyList = {};
+        data.nodes.forEach(node => {
+            adjacencyList[node.id] = [];
+        });
+        data.links.forEach(link => {
+            adjacencyList[link.source].push(link.target);
+            adjacencyList[link.target].push(link.source); // Nếu đồ thị vô hướng
+        });
+        return adjacencyList;
+    };
+    const dfs = (node, visited, adjacencyList, component) => {
+        visited.add(node);
+        component.push(node);
+        adjacencyList[node].forEach(neighbor => {
+            if (!visited.has(neighbor)) {
+                dfs(neighbor, visited, adjacencyList, component);
             }
         });
-    }
-
-    // Step 2: Create links based on the connections
-    const links = [];
-
-    for (const key in inputData) {
-        inputData[key].forEach(link => {
-            links.push({ source: key, target: link.node, value: link.weight });
-        });
-    }
-
-    // Final output
-    return {
-        nodes: nodes,
-        links: links
     };
-}
+    const adjacencyList = createAdjacencyList(data);
+    const visited = new Set();
+    const components = [];
 
-// Example usage
-const inputData = {
-    '1': [],
-    '2': [ { node: '3', weight: 4 } ],
-    '3': [ { node: '2', weight: 4 } ]
+    for (const node of data.nodes.map(n => n.id)) {
+        if (!visited.has(node)) {
+            const component = [];
+            dfs(node, visited, adjacencyList, component);
+            components.push(component);
+        }
+    }
+
+    return components;
 };
-
-const outputData = convertDataStructure(inputData);
-console.log(outputData);

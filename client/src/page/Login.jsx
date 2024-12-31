@@ -1,6 +1,8 @@
+import ForceGraph from "../components/ForceGraph";
+
 const Login = () => {
     return ( <>
-    Login
+    <ForceGraph/>
     </> );
 }
  

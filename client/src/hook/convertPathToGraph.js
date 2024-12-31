@@ -5,7 +5,7 @@ function convertPathToGraph(path, links) {
     // Duyệt qua đường đi để tạo danh sách các node
     path.forEach(nodeId => {
         if (!uniqueNodes.has(nodeId)) {
-            nodes.push({ id: nodeId, label: `Node ${nodeId}` });
+            nodes.push({ id: nodeId, label: `${nodeId}` });
             uniqueNodes.add(nodeId);
         }
     });
