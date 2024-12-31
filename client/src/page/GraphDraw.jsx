@@ -26,6 +26,8 @@ const GraphDraw = () => {
     const [highlightedNodes, setHighlightedNodes] = useState([]);
     const [highlightedLinks, setHighlightedLinks] = useState([]);
     const [isConnectLink, setIsConnectLink] = useState(false);
+    const [sourceResultNodeId, setSourceResultNodeId] = useState('');
+    const [targetResultNodeId, setTargetResultNodeId] = useState('');
     //Ham chuc nang them
     const addNode = () => {
         if (sourceNodeId && !data.nodes.find(node => node.id === sourceNodeId)) {
@@ -269,7 +271,7 @@ const GraphDraw = () => {
                             marginLeft: 50, 
                             }}>
                         
-                        <input type="radio" id="diem-ket-noi" name='thuc-hien-chuc-nang' onClick={() =>setLuaChonChucNang(2)}/>
+                        <input type="radio" id="diem-ket-noi" name='thuc-hien-chuc-nang' onClick={() =>setLuaChonChucNang(2)} checked={!(luaChonChucNang - 2)}/>
                         <p style={{
                             width:120,
                             marginLeft:50
@@ -280,7 +282,7 @@ const GraphDraw = () => {
                             display: 'flex', 
                             marginLeft: 50, 
                             }}>
-                        <input type="radio" id="diem-ket-noi" name='thuc-hien-chuc-nang' onClick={() =>setLuaChonChucNang(3)}/>
+                        <input type="radio" id="diem-ket-noi" name='thuc-hien-chuc-nang' onClick={() =>setLuaChonChucNang(3)} checked={!(luaChonChucNang - 3)}/>
                         <p style={{
                             width:120,
                             marginLeft:50
@@ -291,7 +293,7 @@ const GraphDraw = () => {
                             display: 'flex', 
                             marginLeft: 50, 
                             }}>
-                        <input type="radio" id="diem-ket-noi" name='thuc-hien-chuc-nang' onClick={() =>setLuaChonChucNang(4)}/>
+                        <input type="radio" id="diem-ket-noi" name='thuc-hien-chuc-nang' onClick={() =>setLuaChonChucNang(4)} checked={!(luaChonChucNang - 4)}/>
                         <p style={{
                             width:200,
                             marginLeft:50
@@ -314,14 +316,20 @@ const GraphDraw = () => {
                     justifyContent: 'space-between' 
                     }}>
                         <h3>Điểm đầu</h3>
-                        <input type="text" id="nhapChu"  />
+                        <input type="text" id="nhapChu"  
+                        value={sourceResultNodeId}
+                        onChange={(e) => setSourceResultNodeId(e.target.value)}
+                        />
                     </div>
                     <div style={{ 
                     display: 'flex', 
                     justifyContent: 'space-between' 
                     }}>
                         <h3>Điểm cuối</h3>
-                        <input type="text" id="nhapChu"  />
+                        <input type="text" id="nhapChu"  
+                        value={targetResultNodeId}
+                        onChange={(e) => setTargetResultNodeId(e.target.value)}
+                        />
                     </div>
                   </div>
                   }
@@ -360,7 +368,9 @@ const GraphDraw = () => {
                 {/* KetQua */}
                 <div class='Ket-qua'>
                 {!statusKetQua && <>
-                    <h3>Có n {kieuKetQua[ketQua]}: </h3>
+                    <h3>Có n {
+                      kieuKetQua[ketQua]
+                      }: </h3>
                 <div style={{
                     margin:20
                 }}>
