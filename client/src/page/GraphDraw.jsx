@@ -23,6 +23,9 @@ const GraphDraw = () => {
     const [sourceNodeId, setSourceNodeId] = useState('');
     const [targetNodeId, setTargetNodeId] = useState('');
     const [linkValue, setLinkValue] = useState(1);
+    const [highlightedNodes, setHighlightedNodes] = useState([]);
+    const [highlightedLinks, setHighlightedLinks] = useState([]);
+    const [isConnectLink, setIsConnectLink] = useState(false);
     //Ham chuc nang them
     const addNode = () => {
         if (sourceNodeId && !data.nodes.find(node => node.id === sourceNodeId)) {
@@ -89,7 +92,12 @@ const GraphDraw = () => {
           alert('Cả ID nút nguồn và nút đích và cạnh đều cần thiết để xóa liên kết.');
         }
       };
-
+      const highlightComponent = (nodeId) => {
+        const { componentNodes, componentLinks } = findConnectedComponents(nodeId);
+        setHighlightedNodes(componentNodes);
+        setHighlightedLinks(componentLinks);
+        // alert(1);
+      };
     return ( <>
     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         
@@ -180,9 +188,13 @@ const GraphDraw = () => {
                                     <p style={{
                                         width:150
                                     }}>Kết nối: </p>
-                                    <input type="radio" id="diem-ket-noi" name='ket-noi' />
+                                    <input type="radio" id="diem-ket-noi" name='ket-noi' 
+                      
+                                    onClick={() => setIsConnectLink(true)}/>
                                     <p>Có</p>
-                                    <input type="radio" id="diem-ket-noi" name='ket-noi' />
+                                    <input type="radio" id="diem-ket-noi" name='ket-noi' 
+                                    onClick={() => setIsConnectLink(false)}
+                                    />
                                     <p>Không</p>
                                 </div>
                                 
@@ -191,10 +203,17 @@ const GraphDraw = () => {
                                 justifyContent: 'space-between' 
                                 }}>
                                     <p>Điểm kết nối</p>
-                                    <input type="text" id="nhapChu" 
+                                    {isConnectLink ? <input type="text" id="nhapChu" 
                                     value={targetNodeId}
                                     onChange={(e) => setTargetNodeId(e.target.value)} 
                                     />
+                                  : <input type="text" id="nhapChu" 
+                                  value={targetNodeId}
+                                  onChange={(e) => setTargetNodeId(e.target.value)} 
+                                  disabled
+                                  />
+                                  }
+                                    
                                 </div>
 
                                 <div style={{ 
@@ -202,10 +221,19 @@ const GraphDraw = () => {
                                 justifyContent: 'space-between' 
                                 }}>
                                     <p>Giá trị</p>
-                                    <input type="text" id="nhapChu" 
-                                    value={linkValue}
-                                    onChange={(e) => setLinkValue(Number(e.target.value))}
-                                    />
+                                    {
+                                      isWeighted ? <input type="text" id="nhapChu" 
+                                      value={linkValue}
+                                      onChange={(e) => setLinkValue(Number(e.target.value))}
+                                      />
+                                      :
+                                      <input type="text" id="nhapChu" 
+                                      value={linkValue}
+                                      onChange={(e) => setLinkValue(Number(e.target.value))}
+                                      disabled
+                                      />
+                                    }
+  
                                 </div>
                             </div>    
                     </div>
@@ -215,8 +243,8 @@ const GraphDraw = () => {
                         justifyContent: ''
                         }}>
 
-                        <Button onClick={addLink}>Thêm </Button>
-                        <Button onClick={removeLink}>Xóa </Button>
+                        <Button onClick={isConnectLink ? addLink : addNode}>Thêm </Button>
+                        <Button onClick={isConnectLink ? removeLink: removeNode}>Xóa </Button>
                     </div>
                     
                 </div>
@@ -356,7 +384,16 @@ const GraphDraw = () => {
         {/* BoxGraph */}
         <div class="box-graph">
         <ForceGraph2D
-        graphData={data}
+        graphData={{
+          nodes: data.nodes.map(node => ({
+            ...node,
+            color: highlightedNodes.includes(node.id) ? 'red' : undefined,
+          })),
+          links: data.links.map(link => ({
+            ...link,
+            color: highlightedLinks.includes(link) ? 'red' : undefined,
+          })),
+        }}
         nodeAutoColorBy="id"
         linkDirectionalParticles={isWeighted ? 4 : 1}
         linkDirectionalParticleSpeed={d => d.value * 0.001}
