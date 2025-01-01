@@ -1,42 +1,72 @@
-const pointsArray = points.split(' ').map(p => p.trim()).filter(p => p);
-export const  findCycles = (graph, points) => {
-    const cycles = [];
+const data = {
+    nodes: [
+        { id: 'A', label: 'A' },
+        { id: 'B', label: 'B' },
+        { id: 'C', label: 'C' },
+        { id: 'D', label: 'D' },
+        { id: 'E', label: 'E' },
+        { id: 'R', label: 'R' },
+    ],
+    links: [
+        { source: 'B', target: 'A', value: 1 },
+        { source: 'A', target: 'E', value: 1 },
+        { source: 'E', target: 'C', value: 1 },
+        { source: 'A', target: 'C', value: 1 },
+        { source: 'D', target: 'B', value: 2 },
+        { source: 'C', target: 'D', value: 3 },
+    ],
+};
 
-    const dfs = (node, visited, path, totalWeight) => {
-        if (visited[node]) {
-            const cycleStartIndex = path.indexOf(node);
-            if (cycleStartIndex !== -1) {
-                const cycle = path.slice(cycleStartIndex);
-                if (cycle.length > 2) { // Chu trình phải có ít nhất 3 đỉnh
-                    cycles.push({ cycle, totalWeight });
-                }
+
+
+
+// Tìm tất cả chu trình đơn qua một điểm
+const findCycles=(data, start, end) => {
+    // Chuyển đổi dữ liệu từ links sang danh sách kề
+    function buildGraph(data) {
+        const graph = {};
+        data.links.forEach(link => {
+            if (!graph[link.source]) {
+                graph[link.source] = [];
             }
+            graph[link.source].push(link.target);
+        });
+        return graph;
+    }
+    const graph = buildGraph(data);
+
+    const result = [];
+    const visited = new Set();
+    const path = [];
+
+    function dfs(node) {
+        if (path.length > 0 && node === start && visited.has(end)) {
+            // Nếu chúng ta quay lại điểm bắt đầu, lưu chu trình
+            result.push([...path]);
             return;
         }
 
-        visited[node] = true;
-        path.push(node);
-
-        for (const neighbor of graph[node]) {
-            dfs(neighbor.node, visited, path, totalWeight + neighbor.weight);
+        if (visited.has(node)) {
+            return; // Nếu đã thăm nút này, không tiếp tục
         }
 
-        path.pop();
-        visited[node] = false;
-    };
+        visited.add(node);
+        path.push(node);
 
-    for (const point of points) {
-        const visited = {};
-        dfs(point, visited, [], 0);
+        for (const neighbor of graph[node] || []) {
+            dfs(neighbor);
+        }
+
+        path.pop(); // Quay lại để tìm chu trình khác
+        visited.delete(node); // Xóa nút khỏi visited để cho phép tìm kiếm lại
     }
 
-    // Loại bỏ các chu trình trùng lặp
-    const uniqueCycles = Array.from(new Set(cycles.map(cycleObj => cycleObj.cycle.join(',')))).map(cycle => cycle.split(','));
-
-    console.log('Các chu trình đi qua tập các điểm đã nhập:');
-    uniqueCycles.forEach(cycle => {
-        const cycleDetails = cycles.find(cycleObj => cycleObj.cycle.join(',') === cycle.join(','));
-        console.log(`Chu trình: ${cycle.join(' -> ')}, Tổng trọng số: ${cycleDetails.totalWeight}`);
-    });
-    return uniqueCycles;
+    dfs(start);
+    return result;
 }
+
+// Sử dụng hàm
+
+const startNode = 'A'; // Điểm bắt đầu
+const cycles = findCycles(data, startNode, 'G');
+console.log(cycles);

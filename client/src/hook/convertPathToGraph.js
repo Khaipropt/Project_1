@@ -1,8 +1,8 @@
-function convertPathToGraph(path, links) {
+const convertPathToGraph = (path, links) => {
     const nodes = [];
     const uniqueNodes = new Set();
 
-    // Duyệt qua đường đi để tạo danh sách các node
+    
     path.forEach(nodeId => {
         if (!uniqueNodes.has(nodeId)) {
             nodes.push({ id: nodeId, label: `${nodeId}` });
@@ -10,13 +10,13 @@ function convertPathToGraph(path, links) {
         }
     });
 
-    // Tạo các liên kết từ đường đi
+    
     const graphLinks = [];
     for (let i = 0; i < path.length - 1; i++) {
         const source = path[i];
-        const target = path[i + 1];
+        const target = path[i + 1];z
 
-        // Tìm giá trị weight từ links
+        
         const link = links.find(link => 
             (link.source === source && link.target === target) || 
             (link.source === target && link.target === source)

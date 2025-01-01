@@ -65,12 +65,59 @@ const GraphDraw = () => {
   };
     console.log(ConnectedComponents(data).at(0).join(","));
     // Chu trình
-
+    const findCycles = (data, start, end) => {
+      function buildGraph(data) {
+          const graph = {};
+          data.links.forEach(link => {
+            if (!graph[link.source]) {
+                graph[link.source] = [];
+                
+            }
+            if (!graph[link.target] && !isDirected) {
+                graph[link.target] = [];
+                
+            }
+            graph[link.source].push(link.target);
+            if(!isDirected) graph[link.target].push(link.source);
+        });
+          return graph;
+      }
+  
+      const graph = buildGraph(data);
+      const result = [];
+      const visited = new Set();
+      const path = [];
+  
+      function dfs(node) {
+          if (path.length > 0 && node === start && visited.has(end)) {
+              result.push([...path,start]);
+              return;
+          }
+  
+          if (visited.has(node)) {
+              return;
+          }
+  
+          visited.add(node);
+          path.push(node);
+  
+          for (const neighbor of graph[node] || []) {
+              dfs(neighbor);
+          }
+  
+          path.pop();
+          visited.delete(node);
+      }
+  
+      dfs(start);
+      return result;
+  }
     // Đường đi ngắn nhất
 
     const findShortestPath = (graph, start, end) => {
-
-        
+      if (!graph.nodes.find(node => node.id === start) || !graph.nodes.find(node => node.id === end)){
+      return { path:[],totalDistance: 0 };
+      }
       const adjList = {};
       graph.nodes.forEach(node => {
           adjList[node.id] = [];
@@ -128,7 +175,7 @@ const GraphDraw = () => {
       path.reverse();
       
       const totalDistance = distances[end];
-      if (totalDistance === Infinity) return {path:"0",totalDistance};
+      if (totalDistance === Infinity) return {path:[],totalDistance};
       return { path, totalDistance };
   }
 
@@ -163,8 +210,8 @@ const GraphDraw = () => {
             data.nodes.find(node => node.id === sourceNodeId) && 
             data.nodes.find(node => node.id === targetNodeId) &&
             !data.links.find(link => 
-              (isDirected && link.source.id === sourceNodeId && link.target.id === targetNodeId) || 
-              (!isDirected && ((link.source.id === sourceNodeId && link.target.id === targetNodeId) || (link.source === targetNodeId && link.target === sourceNodeId)))
+              (isDirected && link.source === sourceNodeId && link.target === targetNodeId) || 
+              (!isDirected && ((link.source === sourceNodeId && link.target === targetNodeId) || (link.source === targetNodeId && link.target === sourceNodeId)))
             )) {
           const newLink = { 
             source: sourceNodeId, 
@@ -223,7 +270,15 @@ const GraphDraw = () => {
         const { componentNodes, componentLinks } = findConnectedComponents(nodeId);
         setHighlightedNodes(componentNodes);
         setHighlightedLinks(componentLinks);
-        // alert(1);
+        console.log(findConnectedComponents(nodeId));
+      };
+      
+      const highlightPath = (path) => {
+        // const { componentNodes, componentLinks } = convertPathToGraph(path);
+        // setHighlightedNodes(componentNodes);
+        // setHighlightedLinks(componentLinks);
+        // console.log("path",convertPathToGraph(path));
+        // alert(path);
       };
     return ( <>
     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -510,12 +565,34 @@ const GraphDraw = () => {
                 </>
                 }
                 {
+                  luaChonChucNang==3 && <>
+                  <h3>Có {findCycles(data,sourceResultNodeId,targetResultNodeId).length} {
+                      kieuKetQua[ketQua]
+                      }: </h3>
+                  <div style={{
+                    margin:20
+                }}>
+                    {
+                      findCycles(data,sourceResultNodeId,targetResultNodeId).map((component, index) =>
+                        <p class='chon' onClick={() => highlightPath(component)}>{kieuKetQua[ketQua]} thứ {index + 1}: {component.join(",")} </p>
+                      )
+                    }
+
+                    {/* Cần chỉnh sửa */}
+                </div>
+                    {
+                    findCycles(data,sourceResultNodeId,targetResultNodeId).map((component, index) =>{
+                      <p class='chon' >{kieuKetQua[ketQua]} thứ {index + 1}: </p>
+                    })
+                  }
+                  </>
+                }
+                {
                   luaChonChucNang==4 && <>
                   <h3 style={{
                     marginTop:30
                 }}> Đường đi ngắn nhất từ {sourceResultNodeId} đến {targetResultNodeId} là: </h3>
-                  
-                    <p>{findShortestPath(data, sourceResultNodeId, targetResultNodeId).path.join(", ")}</p>
+                    {!findShortestPath(data, sourceResultNodeId, targetResultNodeId).totalDistance ? "Không có" : <p>{findShortestPath(data, sourceResultNodeId, targetResultNodeId).path.join(", ")}</p>  }
                     <p>Có giá trị là: {findShortestPath(data, sourceResultNodeId, targetResultNodeId).totalDistance}</p>
                   </>
                 }
